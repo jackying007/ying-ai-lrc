@@ -10,18 +10,18 @@ type TFolder = {
   link: string
 }
 type AppStore = {
-  folders: string[]
   volume: number
-  folderList?: TFolder[]
+  localFolders: string[]
+  localFolderList?: TFolder[]
 }
 const defualtValues: AppStore = {
-  folders: [],
-  volume: 0.75
+  volume: 0.75,
+  localFolders: []
 }
 export const useAppStore = create<AppStore>(() => defualtValues)
 useAppStore.subscribe((state, prevState) => {
-  if (state.folders !== prevState.folders) {
-    const folderList = state.folders.map((folder, index) => {
+  if (state.localFolders !== prevState.localFolders) {
+    const localFolderList = state.localFolders.map((folder, index) => {
       const name = folder.split('\\').pop() ?? ''
       return {
         id: index,
@@ -29,10 +29,12 @@ useAppStore.subscribe((state, prevState) => {
         link: folder
       }
     })
-    useAppStore.setState({ folderList })
+    useAppStore.setState({ localFolderList })
   }
   if (JSON.stringify(state) !== JSON.stringify(prevState)) {
-    writeTextFile(FILE_NAME, JSON.stringify({ ...state, folderList: undefined }), { baseDir: BaseDirectory.Resource })
+    writeTextFile(FILE_NAME, JSON.stringify({ ...state, localFolderList: undefined }), {
+      baseDir: BaseDirectory.Resource
+    })
   }
 })
 
@@ -43,12 +45,12 @@ async function folderExists(path: string): Promise<boolean> {
     return false
   }
 }
-async function checkFolders() {
-  const folders = useAppStore.getState().folders
+async function checkLocalFolders() {
+  const localFolders = useAppStore.getState().localFolders
 
   const existsFolders = (
     await Promise.all(
-      folders.map(async folder => {
+      localFolders.map(async folder => {
         return {
           folder,
           isExists: await folderExists(folder)
@@ -59,7 +61,7 @@ async function checkFolders() {
     .filter(f => f.isExists)
     .map(el => el.folder)
 
-  useAppStore.setState({ folders: existsFolders })
+  useAppStore.setState({ localFolders: existsFolders })
 }
 let inited = false
 async function initAppConfig() {
@@ -71,22 +73,22 @@ async function initAppConfig() {
     } else {
       writeTextFile(FILE_NAME, JSON.stringify(defualtValues), { baseDir: BaseDirectory.Resource })
     }
-    await checkFolders()
+    await checkLocalFolders()
     inited = true
   }
 }
 await initAppConfig()
 
-export async function importFolder() {
+export async function importLocalFolder() {
   const folderLink = await open({
     multiple: false,
     directory: true
   })
   if (!folderLink) return
-  const folders = useAppStore.getState().folders
-  if (folders.some(folder => folder === folderLink)) return
+  const localFolders = useAppStore.getState().localFolders
+  if (localFolders.some(folder => folder === folderLink)) return
   useAppStore.setState({
-    folders: [...folders, folderLink]
+    localFolders: [...localFolders, folderLink]
   })
-  await checkFolders()
+  await checkLocalFolders()
 }

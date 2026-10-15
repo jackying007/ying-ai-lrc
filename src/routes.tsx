@@ -1,8 +1,8 @@
 import { createBrowserRouter, Navigate } from 'react-router'
 import { AppLayout } from '@/layout'
-import { Index } from '@/pages/index'
-import { Test } from '@/pages/test'
-import { FolderDetail } from '@/pages/folder/folder-detail'
+import Local from '@/pages/local'
+import LocalDetail from '@/pages/local/detail'
+import Test from '@/pages/test'
 
 export const router = createBrowserRouter([
   {
@@ -11,19 +11,19 @@ export const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <Navigate to="index" />
+        element: <Navigate to="local" />
       },
       {
-        path: 'index',
-        element: <Index />
+        path: 'local',
+        element: <Local />
+      },
+      {
+        path: 'local/:folderId',
+        element: <LocalDetail />
       },
       {
         path: 'test',
         element: <Test />
-      },
-      {
-        path: 'folder/:folderId',
-        element: <FolderDetail />
       }
     ]
   }

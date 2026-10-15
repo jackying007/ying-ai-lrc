@@ -51,36 +51,6 @@ export const usePlayerOpen = () => {
 }
 
 const audio = new Audio()
-audio.addEventListener('volumechange', () => {
-  useAppStore.setState({
-    volume: audio.volume
-  })
-})
-audio.addEventListener('pause', () => {
-  useAudioStore.setState({
-    playState: PlayState.Paused
-  })
-})
-audio.addEventListener('playing', () => {
-  useAudioStore.setState({
-    playState: PlayState.Playing
-  })
-})
-audio.addEventListener('ended', () => {
-  useAudioStore.setState({
-    playState: PlayState.Ended
-  })
-})
-audio.addEventListener('durationchange', () => {
-  useAudioStore.setState({
-    duration: audio.duration
-  })
-})
-audio.addEventListener('timeupdate', () => {
-  useAudioStore.setState({
-    currentTime: audio.currentTime
-  })
-})
 
 type CachedData = {
   objectUrl: string
@@ -185,3 +155,35 @@ export const setCurrentTime = (currentTime: number) => {
 export const setVolume = (volume: number) => {
   audio.volume = volume
 }
+
+audio.addEventListener('volumechange', () => {
+  useAppStore.setState({
+    volume: audio.volume
+  })
+})
+audio.addEventListener('pause', () => {
+  useAudioStore.setState({
+    playState: PlayState.Paused
+  })
+})
+audio.addEventListener('playing', () => {
+  useAudioStore.setState({
+    playState: PlayState.Playing
+  })
+})
+audio.addEventListener('ended', () => {
+  useAudioStore.setState({
+    playState: PlayState.Ended
+  })
+  playNextAudio()
+})
+audio.addEventListener('durationchange', () => {
+  useAudioStore.setState({
+    duration: audio.duration
+  })
+})
+audio.addEventListener('timeupdate', () => {
+  useAudioStore.setState({
+    currentTime: audio.currentTime
+  })
+})

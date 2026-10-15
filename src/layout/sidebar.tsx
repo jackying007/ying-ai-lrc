@@ -17,14 +17,14 @@ import {
   // SidebarRail
 } from '@/components/ui/sidebar'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
-import { useAppStore, importFolder } from '@/store/app-store'
+import { useAppStore, importLocalFolder } from '@/store/app-store'
 import { usePlayerOpen } from '@/store/audio-store'
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { pathname } = useLocation()
   const navigate = useNavigate()
 
-  const folderList = useAppStore(state => state.folderList)
+  const localFolderList = useAppStore(state => state.localFolderList)
   const playerOpen = usePlayerOpen()
 
   return (
@@ -39,23 +39,23 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 <CollapsibleTrigger asChild>
                   <SidebarMenuButton>
                     <Folder />
-                    <span>音乐文件夹</span>
+                    <span>本地</span>
                     <ChevronRight className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-90" />
                   </SidebarMenuButton>
                 </CollapsibleTrigger>
-                <SidebarMenuAction onClick={importFolder}>
+                <SidebarMenuAction onClick={importLocalFolder}>
                   <Plus />
                 </SidebarMenuAction>
                 <CollapsibleContent>
                   <SidebarMenuSub>
-                    {folderList?.map(el => (
-                      <SidebarMenuSubItem key={el.id} onClick={() => navigate(`/folder/${el.id}`)}>
-                        <SidebarMenuSubButton className="cursor-pointer" isActive={`/folder/${el.id}` === pathname}>
+                    {localFolderList?.map(el => (
+                      <SidebarMenuSubItem key={el.id} onClick={() => navigate(`/local/${el.id}`)}>
+                        <SidebarMenuSubButton className="cursor-pointer" isActive={`/local/${el.id}` === pathname}>
                           {el.name}
                         </SidebarMenuSubButton>
                       </SidebarMenuSubItem>
                     ))}
-                    {!folderList?.length && <p className="text-sm">暂无文件夹</p>}
+                    {!localFolderList?.length && <p className="text-sm">暂无导入</p>}
                   </SidebarMenuSub>
                 </CollapsibleContent>
               </SidebarMenuItem>

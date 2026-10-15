@@ -39,9 +39,9 @@ async function getAudioList(folderLink: string, folderFiles: DirEntry[]) {
   return list
 }
 
-export const FolderDetail = () => {
+export default function () {
   const params = useParams()
-  const folderList = useAppStore(state => state.folderList)
+  const localFolderList = useAppStore(state => state.localFolderList)
   const [audioList, setAudioList] = useState<AudioInfo[]>([])
   const currentAudioInfo = useAudioStore(state => state.currentAudioInfo)
   const playState = useAudioStore(state => state.playState)
@@ -51,7 +51,7 @@ export const FolderDetail = () => {
       setAudioList([])
       if (!params.folderId) return
       const folderId = Number(params.folderId)
-      const folder = folderList?.find(el => el.id === folderId)
+      const folder = localFolderList?.find(el => el.id === folderId)
       if (!folder) return
       const folderFiles = await readDir(folder.link)
       const list = await getAudioList(
@@ -61,7 +61,7 @@ export const FolderDetail = () => {
       setAudioList(list)
       useAudioStore.setState({ audioList: list })
     })()
-  }, [params, folderList])
+  }, [params, localFolderList])
 
   return (
     <Table>

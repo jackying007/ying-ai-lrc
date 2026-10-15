@@ -1,4 +1,4 @@
-export const Test = () => {
+export default function () {
   return (
     <p>
       <ruby>

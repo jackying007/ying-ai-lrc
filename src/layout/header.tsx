@@ -8,24 +8,24 @@ const appWindow = getCurrentWindow()
 export function AppHeader() {
   return (
     <div data-tauri-drag-region className="flex justify-between p-2 cursor-move">
-      <SidebarTrigger variant="outline" className="w-8 h-8" />
+      <SidebarTrigger variant="ghost" className="w-8 h-8" />
 
       <div className="flex gap-x-2">
         {import.meta.env.DEV && (
-          <Button variant="outline" size="icon" className="w-8 h-8" onClick={() => window.location.replace('/')}>
+          <Button variant="ghost" size="icon" className="w-8 h-8" onClick={() => window.location.replace('/')}>
             <RefreshCw />
           </Button>
         )}
 
-        <Button variant="outline" size="icon" className="w-8 h-8" onClick={() => appWindow.minimize()}>
+        <Button variant="ghost" size="icon" className="w-8 h-8" onClick={() => appWindow.minimize()}>
           <Minus />
         </Button>
 
-        <Button variant="outline" size="icon" className="w-8 h-8" onClick={() => appWindow.toggleMaximize()}>
+        <Button variant="ghost" size="icon" className="w-8 h-8" onClick={() => appWindow.toggleMaximize()}>
           <Maximize />
         </Button>
 
-        <Button variant="outline" size="icon" className="w-8 h-8" onClick={() => appWindow.close()}>
+        <Button variant="ghostDestructive" size="icon" className="w-8 h-8" onClick={() => appWindow.close()}>
           <X />
         </Button>
       </div>

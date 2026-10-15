@@ -7,7 +7,7 @@ import { AppSidebar } from './sidebar'
 import { AppHeader } from './header'
 import { AudioPlayer } from './audio-player'
 
-export const AppLayout = () => {
+export function AppLayout() {
   const playerOpen = usePlayerOpen()
 
   return (

@@ -49,7 +49,7 @@ export function Lyric() {
   }, [currentLrc])
   const lrcTimes = useMemo(() => Object.keys(lrcMap), [lrcMap])
 
-  const lrcDivMapRef = useRef<Record<string, HTMLDivElement>>({})
+  const lrcDivMapRef = useRef<Record<string, HTMLDivElement | null>>({})
   const scrolleWrapRef = useRef<HTMLDivElement>(null)
 
   const userScrollFlag = useRef(false)
@@ -69,7 +69,8 @@ export function Lyric() {
 
   useEffect(() => {
     if (scrolleWrapRef.current) {
-      apiScrollFlag.current = true
+      lrcDivMapRef.current = {}
+      apiScrollFlag.current = false
       scrolleWrapRef.current.scrollTop = 0
     }
   }, [lrcTimes])
@@ -82,13 +83,15 @@ export function Lyric() {
       if (isInside) return time1
     }
   }, [lrcTimes, currentTime])
+
   function scrollToLrcDiv(time: string) {
     apiScrollFlag.current = true
-    lrcDivMapRef.current[time].scrollIntoView({
+    lrcDivMapRef.current[time]?.scrollIntoView({
       behavior: 'smooth',
       block: 'center'
     })
   }
+
   useEffect(() => {
     if (!userScrollFlag.current && !apiScrollFlag.current && currentTimeStr) scrollToLrcDiv(currentTimeStr)
   }, [currentTimeStr])
