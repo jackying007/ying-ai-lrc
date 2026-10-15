@@ -43,7 +43,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     <ChevronRight className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-90" />
                   </SidebarMenuButton>
                 </CollapsibleTrigger>
-                <SidebarMenuAction onClick={importLocalFolder}>
+                <SidebarMenuAction
+                  onClick={async () => {
+                    const newIndex = await importLocalFolder()
+                    if (!newIndex) return
+                    setTimeout(() => navigate(`/local/${newIndex}`))
+                  }}
+                >
                   <Plus />
                 </SidebarMenuAction>
                 <CollapsibleContent>

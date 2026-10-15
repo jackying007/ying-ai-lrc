@@ -2,19 +2,21 @@ import { create } from 'zustand'
 import { BaseDirectory, exists, readTextFile, writeTextFile } from '@tauri-apps/plugin-fs'
 import { open } from '@tauri-apps/plugin-dialog'
 
-const FILE_NAME = 'appStore.json'
+const STORE_FILE_NAME = 'appStore.json'
 
-type TFolder = {
+export type TFolder = {
   id: number
   name: string
   link: string
 }
 type AppStore = {
+  inited: boolean
   volume: number
   localFolders: string[]
   localFolderList?: TFolder[]
 }
 const defualtValues: AppStore = {
+  inited: false,
   volume: 0.75,
   localFolders: []
 }
@@ -32,7 +34,7 @@ useAppStore.subscribe((state, prevState) => {
     useAppStore.setState({ localFolderList })
   }
   if (JSON.stringify(state) !== JSON.stringify(prevState)) {
-    writeTextFile(FILE_NAME, JSON.stringify({ ...state, localFolderList: undefined }), {
+    writeTextFile(STORE_FILE_NAME, JSON.stringify({ ...state, localFolderList: undefined }), {
       baseDir: BaseDirectory.Resource
     })
   }
@@ -63,21 +65,18 @@ async function checkLocalFolders() {
 
   useAppStore.setState({ localFolders: existsFolders })
 }
-let inited = false
-async function initAppConfig() {
-  if (!inited) {
-    const appStoreJsonExists = await exists(FILE_NAME, { baseDir: BaseDirectory.Resource })
-    if (appStoreJsonExists) {
-      const appStoreJson = await readTextFile(FILE_NAME, { baseDir: BaseDirectory.Resource })
-      useAppStore.setState(JSON.parse(appStoreJson))
-    } else {
-      writeTextFile(FILE_NAME, JSON.stringify(defualtValues), { baseDir: BaseDirectory.Resource })
-    }
-    await checkLocalFolders()
-    inited = true
+
+;(async function () {
+  const appStoreJsonExists = await exists(STORE_FILE_NAME, { baseDir: BaseDirectory.Resource })
+  if (appStoreJsonExists) {
+    const appStoreJson = await readTextFile(STORE_FILE_NAME, { baseDir: BaseDirectory.Resource })
+    useAppStore.setState(JSON.parse(appStoreJson))
+  } else {
+    writeTextFile(STORE_FILE_NAME, JSON.stringify(defualtValues), { baseDir: BaseDirectory.Resource })
   }
-}
-await initAppConfig()
+  await checkLocalFolders()
+  useAppStore.setState({ inited: true })
+})()
 
 export async function importLocalFolder() {
   const folderLink = await open({
@@ -90,5 +89,5 @@ export async function importLocalFolder() {
   useAppStore.setState({
     localFolders: [...localFolders, folderLink.replace(/\\/g, '/')]
   })
-  await checkLocalFolders()
+  return localFolders.length
 }

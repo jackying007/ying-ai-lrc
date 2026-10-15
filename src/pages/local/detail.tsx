@@ -1,99 +1,63 @@
-import { useEffect, useState } from 'react'
 import { useParams } from 'react-router'
-import { Play, Pause } from 'lucide-react'
-import { type DirEntry, readDir, stat } from '@tauri-apps/plugin-fs'
-import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { AudioLines, Ellipsis } from 'lucide-react'
+import { cn } from 'cn'
+import { PageLoading } from '@/components/page-loading'
 import { Button } from '@/components/ui/button'
-import { useAppStore } from '@/store/app-store'
-import {
-  type AudioInfo,
-  acceptAudioSuffixs,
-  useAudioStore,
-  playAudio,
-  togglePauseOrPlay,
-  PlayState
-} from '@/store/audio-store'
-import { dayjs } from '@/lib/dayjs'
-
-async function getAudioList(folderLink: string, folderFiles: DirEntry[]) {
-  const list = await Promise.all(
-    folderFiles.map<Promise<AudioInfo>>(async file => {
-      const index = file.name.lastIndexOf('.')
-      const [name, suffix] = [file.name.slice(0, index), file.name.slice(index + 1)]
-
-      const link = `${folderLink}/${file.name}`
-      const lrcLink = `${folderLink}/${name}.lrc`
-      const fileStat = await stat(link)
-      return {
-        name,
-        fullName: file.name,
-        link,
-        lrcLink,
-        atime: dayjs(fileStat.atime).format('YYYY-MM-DD HH:mm:ss'),
-        birthtime: dayjs(fileStat.birthtime).format('YYYY-MM-DD HH:mm:ss'),
-        size: (fileStat.size / 1024 / 1024).toFixed(2) + 'MB',
-        type: `audio/${suffix}`
-      }
-    })
-  )
-  return list
-}
+import { useAudioStore, PlayState } from '@/store/audio-store'
+import { playLocalAudio, useLocalAudioStore } from '@/store/local-audio-store'
 
 export default function () {
   const params = useParams()
-  const localFolderList = useAppStore(state => state.localFolderList)
-  const [audioList, setAudioList] = useState<AudioInfo[]>([])
+
   const currentAudioInfo = useAudioStore(state => state.currentAudioInfo)
   const playState = useAudioStore(state => state.playState)
 
-  useEffect(() => {
-    ;(async function () {
-      setAudioList([])
-      if (!params.folderId) return
-      const folderId = Number(params.folderId)
-      const folder = localFolderList?.find(el => el.id === folderId)
-      if (!folder) return
-      const folderFiles = await readDir(folder.link)
-      const list = await getAudioList(
-        folder.link,
-        folderFiles.filter(el => el.isFile && acceptAudioSuffixs.some(suffix => el.name.endsWith(suffix)))
-      )
-      setAudioList(list)
-      useAudioStore.setState({ audioList: list })
-    })()
-  }, [params, localFolderList])
+  const audioList = useLocalAudioStore(state => state[params.folderId ?? ''])
 
+  if (!audioList) return <PageLoading />
   return (
-    <Table>
-      {!audioList.length && <TableCaption>暂无音乐文件</TableCaption>}
-      <TableHeader className="sticky top-0">
-        <TableRow>
-          <TableHead>名称</TableHead>
-          <TableHead>大小</TableHead>
-          <TableHead>创建时间</TableHead>
-          <TableHead>操作</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {audioList.map(audio => (
-          <TableRow key={audio.link}>
-            <TableCell>{audio.name}</TableCell>
-            <TableCell>{audio.size}</TableCell>
-            <TableCell>{audio.birthtime}</TableCell>
-            <TableCell>
-              {currentAudioInfo?.link === audio.link ? (
-                <Button variant="outline" size="icon" className="w-7 h-7" onClick={() => togglePauseOrPlay()}>
-                  {playState === PlayState.Playing ? <Pause /> : <Play />}
-                </Button>
-              ) : (
-                <Button variant="outline" size="icon" className="w-7 h-7" onClick={() => playAudio(audio)}>
-                  <Play />
-                </Button>
-              )}
-            </TableCell>
-          </TableRow>
-        ))}
-      </TableBody>
-    </Table>
+    <div>
+      {!audioList.length && <div className="fc h-20 text-gray-600">暂无音乐文件</div>}
+      {audioList.map((audio, index) => {
+        const isActive = currentAudioInfo?.link === audio.link
+        return (
+          <div key={audio.link} className="flex justify-between border-b border-b-border p-2 pl-0 text-sm">
+            <div className="flex items-center">
+              <span className="w-10 fc">
+                {isActive ? (
+                  <AudioLines
+                    className={cn(
+                      `text-primary
+                      size-6
+                      [&_path]:origin-center
+                      [&_path]:transform-fill
+                      [&_path]:animate-wave
+                      [&_path:nth-child(2)]:[animation-delay:-0.3s]
+                      [&_path:nth-child(3)]:[animation-delay:-0.5s]
+                      [&_path:nth-child(4)]:[animation-delay:-0.7s]
+                      [&_path:nth-child(5)]:[animation-delay:-0.2s]`,
+                      playState !== PlayState.Playing && '[&_path]:[animation-play-state:paused]'
+                    )}
+                  />
+                ) : (
+                  index + 1
+                )}
+              </span>
+              <span
+                className={cn('cursor-pointer', isActive && 'text-primary')}
+                onDoubleClick={() => playLocalAudio(audio, params.folderId!)}
+              >
+                {audio.name}
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button variant="ghost" size="icon-sm" className="cursor-pointer">
+                <Ellipsis />
+              </Button>
+            </div>
+          </div>
+        )
+      })}
+    </div>
   )
 }

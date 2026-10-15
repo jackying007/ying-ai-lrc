@@ -1,6 +1,5 @@
 import { create } from 'zustand'
 import { readFile, readTextFile } from '@tauri-apps/plugin-fs'
-
 import { useAppStore } from './app-store'
 
 export enum ShowMode {
@@ -18,12 +17,8 @@ export enum PlayState {
 
 export type AudioInfo = {
   name: string
-  fullName: string
   link: string
   lrcLink: string
-  atime: string
-  birthtime: string
-  size: string
   type: string
 }
 
@@ -56,7 +51,7 @@ type CachedData = {
   objectUrl: string
   lrc?: string
 }
-const cachedMap = new Map<string, CachedData>()
+export const cachedMap = new Map<string, CachedData>()
 function clearCachedObjectUrl() {
   for (const [link, { objectUrl }] of cachedMap.entries()) {
     if (objectUrl !== audio.currentSrc) {
