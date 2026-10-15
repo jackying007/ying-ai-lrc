@@ -22,7 +22,7 @@ export const useAppStore = create<AppStore>(() => defualtValues)
 useAppStore.subscribe((state, prevState) => {
   if (state.localFolders !== prevState.localFolders) {
     const localFolderList = state.localFolders.map((folder, index) => {
-      const name = folder.split('\\').pop() ?? ''
+      const name = folder.split('/').pop() ?? ''
       return {
         id: index,
         name,
@@ -88,7 +88,7 @@ export async function importLocalFolder() {
   const localFolders = useAppStore.getState().localFolders
   if (localFolders.some(folder => folder === folderLink)) return
   useAppStore.setState({
-    localFolders: [...localFolders, folderLink]
+    localFolders: [...localFolders, folderLink.replace(/\\/g, '/')]
   })
   await checkLocalFolders()
 }

@@ -21,8 +21,8 @@ async function getAudioList(folderLink: string, folderFiles: DirEntry[]) {
       const index = file.name.lastIndexOf('.')
       const [name, suffix] = [file.name.slice(0, index), file.name.slice(index + 1)]
 
-      const link = `${folderLink}\\${file.name}`
-      const lrcLink = `${folderLink}\\${name}.lrc`
+      const link = `${folderLink}/${file.name}`
+      const lrcLink = `${folderLink}/${name}.lrc`
       const fileStat = await stat(link)
       return {
         name,
